@@ -1,0 +1,110 @@
+name: Build
+
+on:
+  push:
+    branches: [master, main, develop]
+  pull_request:
+    branches: [master, main, develop]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Windows - Qt${{ matrix.qt-version }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - qt-version: "5.15.2"
+            qt-arch: "win64_msvc2019_64"
+            qt6: false
+            cmake-args: "-DUSE_QT6=OFF"
+            artifact-name: "HookOfTheReaper-Windows-Qt5-legacy"
+
+          - qt-version: "6.8.1"
+            qt-arch: "win64_msvc2022_64"
+            qt6: true
+            cmake-args: "-DUSE_QT6=ON"
+            artifact-name: "HookOfTheReaper-Windows-Qt6-modern"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Qt 5
+        if: matrix.qt6 == false
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ matrix.qt-version }}
+          arch: ${{ matrix.qt-arch }}
+          cache: true
+
+      - name: Install Qt 6
+        if: matrix.qt6 == true
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ matrix.qt-version }}
+          arch: ${{ matrix.qt-arch }}
+          cache: true
+          modules: "qtserialport qtmultimedia qtconnectivity"
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -G "Ninja" ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Create deployment directory (Qt6)
+        if: matrix.qt6 == true
+        shell: bash
+        run: |
+          mkdir -p deploy/bin
+          cp build/HookOfTheReaper.exe deploy/bin/
+          cd build
+          cmake --install . --prefix "$(cd .. && pwd)/deploy" --config Release
+
+      - name: Create deployment directory (Qt5)
+        if: matrix.qt6 == false
+        shell: bash
+        run: |
+          mkdir -p deploy
+          cp build/HookOfTheReaper.exe deploy/
+          # Copy Qt5 dependencies manually
+          windeployqt deploy/HookOfTheReaper.exe
+
+      - name: Copy data files
+        shell: bash
+        run: |
+          cp -r data deploy/ || true
+          cp -r ini deploy/ || true
+          cp -r defaultLG deploy/ || true
+          cp README.md deploy/ || true
+          cp LICENSE deploy/ || true
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: deploy/
+          retention-days: 30
+
+      - name: Create release archive
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: |
+          cd deploy
+          7z a ../${{ matrix.artifact-name }}.zip *
+
+      - name: Upload to Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ matrix.artifact-name }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,7 +1,9 @@
 #include "LightGun.h"
 #include "../Global.h"
 
+#ifdef AIMTRAK_LIGHTGUN_SUPPORT
 #include "../../saeicmrterta.h"
+#endif //AIMTRAK_LIGHTGUN_SUPPORT
 
 //Constructors
 
@@ -1032,6 +1034,7 @@ LightGun::LightGun(bool lgDefault, quint8 dlgNum, QString lgName, quint8 lgNumbe
     connect(this, &LightGun::DoDisplayOtherCommands, this, &LightGun::DisplayOther2Digit);
 }
 
+#ifdef AIMTRAK_LIGHTGUN_SUPPORT
 //AimTrak
 LightGun::LightGun(bool lgDefault, quint8 dlgNum, QString lgName, quint8 lgNumber, HIDInfo hidInfoStruct, quint16 rcDelay, SupportedRecoils lgRecoils, QObject *parent)
     : QObject{parent}
@@ -1149,6 +1152,7 @@ LightGun::LightGun(bool lgDefault, quint8 dlgNum, QString lgName, quint8 lgNumbe
     connect(this, &LightGun::DoDisplayLifeCommands, this, &LightGun::DisplayLifeNormal);
     connect(this, &LightGun::DoDisplayOtherCommands, this, &LightGun::DisplayOtherNormal);
 }
+#endif // AIMTRAK_LIGHTGUN_SUPPORT
 
 //Sinden
 LightGun::LightGun(bool lgDefault, quint8 dlgNum, QString lgName, quint8 lgNumber, quint16 port, quint8 player, quint8 recVolt, SupportedRecoils lgRecoils, LightGunSettings lgSet, QObject *parent)
@@ -2621,6 +2625,7 @@ void LightGun::LoadDefaultLGCommands()
 
 
     } //if(defaultLightGunNum != AIMTRAK)
+#ifdef AIMTRAK_LIGHTGUN_SUPPORT
     else
     {
 
@@ -2648,6 +2653,7 @@ void LightGun::LoadDefaultLGCommands()
 
         //ReadConfigData();
     }
+#endif // AIMTRAK_LIGHTGUN_SUPPORT
 
 /*
     qDebug() << "No 2 Digit Display:" << noDisplay;

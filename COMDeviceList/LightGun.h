@@ -26,8 +26,10 @@ class LightGun : public QObject
 public:
     //Constructors
 
+#ifdef AIMTRAK_LIGHTGUN_SUPPORT
     //RS3 Reaper
     explicit LightGun(bool lgDefault, quint8 dlgNum, QString lgName, quint8 lgNumber, quint8 cpNumber, QString cpString, QSerialPortInfo cpInfo, qint32 cpBaud, quint8 cpDataBits, quint8 cpParity, quint8 cpStopBits, quint8 cpFlow, SupportedRecoils lgRecoils, LightGunSettings lgSet, bool disableLEDs, quint8 largeAmmo, ReaperSlideData slideData, QObject *parent = nullptr);
+#endif // AIMTRAK_LIGHTGUN_SUPPORT
     //Normal Light Gun & Fusion & Blamcon & X-Gunner & Xena & JB Gun4IR
     explicit LightGun(bool lgDefault, quint8 dlgNum, QString lgName, quint8 lgNumber, quint8 cpNumber, QString cpString, QSerialPortInfo cpInfo, qint32 cpBaud, quint8 cpDataBits, quint8 cpParity, quint8 cpStopBits, quint8 cpFlow, SupportedRecoils lgRecoils, LightGunSettings lgSet, QObject *parent = nullptr);
     //Copy Light Gun

@@ -168,6 +168,7 @@ void ComDeviceList::AddLightGun(LightGun const &lgMember)
     numberLightGuns++;
 }
 
+#ifdef AIMTRAK_LIGHTGUN_SUPPORT
 //For RS3 Reaper Light Gun
 void ComDeviceList::AddLightGun(bool lgDefault, quint8 dlgNum, QString lgName, quint8 lgNumber, quint8 cpNumber, QString cpString, QSerialPortInfo cpInfo, quint32 cpBaud, quint16 cpDataBits, quint16 cpParity, quint16 cpStopBits, quint16 cpFlow, SupportedRecoils lgRecoils, LightGunSettings lgSet, bool disableLEDs,  quint8 largeAmmo, ReaperSlideData slideData)
 {
@@ -180,6 +181,7 @@ void ComDeviceList::AddLightGun(bool lgDefault, quint8 dlgNum, QString lgName, q
 
     numberLightGuns++;
 }
+#endif // AIMTRAK_LIGHTGUN_SUPPORT
 
 //For Normal Light Gun
 void ComDeviceList::AddLightGun(bool lgDefault, quint8 dlgNum, QString lgName, quint8 lgNumber, quint8 cpNumber, QString cpString, QSerialPortInfo cpInfo, quint32 cpBaud, quint16 cpDataBits, quint16 cpParity, quint16 cpStopBits, quint16 cpFlow, SupportedRecoils lgRecoils, LightGunSettings lgSet)
@@ -1127,6 +1129,7 @@ void ComDeviceList::LoadLightGunListV3()
             line = in.readLine();
             tempComPortFlow = line.toUInt ();
 
+#ifdef AIMTRAK_LIGHTGUN_SUPPORT
             if(tempIsDefaultGun && tempDefaultGunNum==RS3_REAPER)
             {
                 bool disableLEDs;
@@ -1162,7 +1165,9 @@ void ComDeviceList::LoadLightGunListV3()
 
                 AddLightGun(tempIsDefaultGun, tempDefaultGunNum, tempLightGunName, tenpLightGunNum, tempComPortNum, tempComPortName, *p_tempComPortInfo, tempComPortBaud, tempComPortDataBits, tempComPortParity, tempComPortStopBits, tempComPortFlow, recoilPriority, lgSet, disableLEDs , largeAmmo, slideData);
             }
-            else if(tempIsDefaultGun && tempDefaultGunNum==MX24)
+            else
+#endif // AIMTRAK_LIGHTGUN_SUPPORT
+            if(tempIsDefaultGun && tempDefaultGunNum==MX24)
             {
                 line = in.readLine();
                 if(line == "0")
